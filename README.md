@@ -8,6 +8,14 @@ Unlike other load testing tools, `oa` uses [Puppeteer](https://pptr.dev) under-t
 
 **Disclaimer: this tool is intended primarily for use on local websites. Attempting to run `oa` on a hosted website, especially one you don't own, is a good way to get your IP blocked.**
 
+## Installation 
+
+Until official binaries can be released, the easiest way to install `oa` is from Deno itself:
+
+```bash
+deno install --allow-env --allow-write --allow-read --allow-run --allow-net https://deno.land/x/oa2
+```
+
 ## Usage
 
 Using `oa` is fairly straightforward. You can test a website using the default options by just passing the URL to the command:
@@ -20,9 +28,9 @@ oa http://127.0.0.1:8080/login
 
 `oa` supports a few flags to customize its behavior:
 
-| Name      | Alias | Description                                                                              | Default Value |
-| --------- | ----- | ---------------------------------------------------------------------------------------- | ------------- |
-| `--show`  | `-s`  | Show the browser window while testing.                                                   | `false`       |
-| `--count` | `-c`  | The number of monkeys/instances to run.                                                  | 3             |
-| `--time`  | `-t`  | The duration to run the test. Supports human-readable times such as '5m', '1 hour', etc. | 10s           |
+| Name      | Alias | Description                                                                              | Default |
+| --------- | ----- | ---------------------------------------------------------------------------------------- | ------- |
+| `--show`  | `-s`  | Show the browser window while testing.                                                   | `false` |
+| `--count` | `-c`  | The number of monkeys/instances to run.                                                  | 3       |
+| `--time`  | `-t`  | The duration to run the test. Supports human-readable times such as '5m', '1 hour', etc. | 10s     |
 
