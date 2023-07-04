@@ -1,53 +1,31 @@
-import {
-  type BackgroundColorName,
-  draw,
-  ElementHandle,
-  ms,
-  Page,
-  Protocol,
-  puppeteer,
-  sleep,
-} from "../deps.ts";
+import { draw, ElementHandle, ms, Page, puppeteer, sleep } from "../deps.ts";
 
 import { Logger } from "./log.ts";
 import { getRandomKeys, getRandomString } from "./random.ts";
-
-export interface MonkeyConfig {
-  name: string;
-  color: BackgroundColorName;
-  url: string;
-  num: number;
-  show?: boolean;
-  duration?: string;
-  cookies: Protocol.Network.CookieParam[];
-  headers: Record<string, string>;
-  skipButtons?: boolean;
-  skipLinks?: boolean;
-  skipInputs?: boolean;
-  skipTyping?: boolean;
-  filterLinks?: string;
-}
+import { ColorMethods, MonkeyConfig } from "./types.ts";
 
 async function getInteractiveElements(page: Page, config: MonkeyConfig) {
   const clickableSelectors = [];
 
-  if (!config.skipButtons) {
+  if (config.targets?.buttons?.enabled) {
     clickableSelectors.push(`button`);
     clickableSelectors.push(`input[type="button"]`);
     clickableSelectors.push(`input[type="submit"]`);
   }
 
-  if (!config.skipLinks) {
+  if (config.targets?.links?.enabled) {
+    const filter = config.targets?.links?.filter;
+
     let selector = "a";
 
-    if (config.filterLinks) {
-      selector += `[href~="${config.filterLinks.replace('"', '\\"')}"]`;
+    if (filter) {
+      selector += `[href~="${filter.replace('"', '\\"')}"]`;
     }
-    console.log(selector);
+
     clickableSelectors.push(selector);
   }
 
-  const inputSelectors = !config.skipInputs
+  const inputSelectors = config.targets?.inputs?.enabled
     ? [
       `input`,
       `not([type="select"])`,
@@ -59,8 +37,12 @@ async function getInteractiveElements(page: Page, config: MonkeyConfig) {
     : [];
 
   return {
-    buttons: await page.$$(clickableSelectors.join(", ")),
-    inputs: await page.$$(inputSelectors.join(":")),
+    buttons: clickableSelectors.length > 0
+      ? await page.$$(clickableSelectors.join(", "))
+      : [],
+    inputs: inputSelectors.length > 0
+      ? await page.$$(inputSelectors.join(":"))
+      : [],
   };
 }
 
@@ -109,12 +91,16 @@ function getDesiredActions(
   inputs: ElementHandle[],
   config: MonkeyConfig,
 ) {
-  const { skipInputs, skipLinks, skipButtons } = config;
+  const { targets } = config;
 
   const actions: ("click" | "type" | "input")[] = [];
-  const shouldClick = buttons.length > 0 && !skipButtons && !skipLinks;
-  const shouldType = !config.skipTyping;
-  const shouldInput = inputs.length > 0 && !skipInputs;
+
+  const shouldClick = buttons.length > 0 && (targets?.buttons?.enabled ||
+    targets?.links?.enabled);
+
+  const shouldType = targets?.typing?.enabled;
+
+  const shouldInput = inputs.length > 0 && targets?.inputs?.enabled;
 
   if (shouldType) {
     actions.push("type");
@@ -131,17 +117,28 @@ function getDesiredActions(
   return actions;
 }
 
-async function startMonkey(name: string, page: Page, config: MonkeyConfig) {
-  const { color, url, headers, duration, cookies } = config;
+async function startMonkey(
+  name: string,
+  color: ColorMethods,
+  page: Page,
+  config: MonkeyConfig,
+) {
+  const { url, headers = {}, duration, cookies = [] } = config;
 
   const logger = new Logger(name, color);
 
   logger.log(`Waiting for first page load...`);
 
   await page.setExtraHTTPHeaders(headers);
+
   await page.setCookie(...cookies);
+
   await page.goto(url);
-  await page.waitForNetworkIdle({ idleTime: 250 });
+
+  await page.waitForNetworkIdle({
+    idleTime: 250,
+    timeout: 5000,
+  }).catch(() => {});
 
   let currentURL = url;
   let elements = await getInteractiveElements(page, config);
@@ -188,10 +185,17 @@ async function startMonkey(name: string, page: Page, config: MonkeyConfig) {
   }
 }
 
-export async function monkeyTest(config: MonkeyConfig) {
-  const { name, show } = config;
+export async function monkeyTest(
+  name: string,
+  color: ColorMethods,
+  config: MonkeyConfig,
+) {
+  const { show } = config;
 
-  const browser = await puppeteer.launch({ headless: !show });
+  const browser = await puppeteer.launch({
+    defaultViewport: null,
+    headless: !show,
+  });
   const page = await browser.newPage();
 
   // Automatically close any new tabs that are opened
@@ -205,5 +209,5 @@ export async function monkeyTest(config: MonkeyConfig) {
     await browser.close();
   });
 
-  return startMonkey(name, page, config);
+  return startMonkey(name, color, page, config);
 }

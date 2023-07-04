@@ -1,16 +1,16 @@
-import { BackgroundColorName, Chalk, ChalkInstance } from "../deps.ts";
+import { colors } from "../deps.ts";
+import { ColorMethods } from "./types.ts";
 
 export class Logger {
-  private readonly chalk: ChalkInstance;
-
   constructor(
     private readonly name: string,
-    private readonly color: BackgroundColorName,
+    private readonly color: ColorMethods,
   ) {
-    this.chalk = new Chalk();
   }
 
   log(message: string) {
-    console.log(`${this.chalk[this.color](this.name)} ${message}`);
+    console.log(
+      `${colors[this.color](this.name)} ${message}`,
+    );
   }
 }

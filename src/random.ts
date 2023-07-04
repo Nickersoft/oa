@@ -2,7 +2,7 @@ import { draw, faker, random, shuffle } from "../deps.ts";
 import { KEYS } from "./constants.ts";
 
 export function getRandomKeys() {
-  return new Array(random(1, 20)).fill(0).map(() => draw(KEYS));
+  return new Array(random(1, 10)).fill(0).map(() => draw(KEYS));
 }
 
 export function randomSubset(arr: readonly string[], size: number) {

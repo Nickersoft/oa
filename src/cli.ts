@@ -1,31 +1,26 @@
 import {
-  type ArgumentValue,
-  type BackgroundColorName,
-  backgroundColorNames,
+  ArgumentValue,
+  colors,
   Command,
   getSetCookies,
-  objectify,
   Protocol,
   range,
-  shake,
-  string,
   ValidationError,
 } from "../deps.ts";
-import { loadConfig } from "./config.ts";
+import { defaultConfig, loadConfig } from "./config.ts";
+import { BG_COLORS } from "./constants.ts";
 
-import { MonkeyConfig, monkeyTest } from "./monkey.ts";
+import { monkeyTest } from "./monkey.ts";
 import { randomSubset } from "./random.ts";
+import { ColorMethods } from "./types.ts";
+import { kvToMap, validateURL } from "./utils.ts";
 
-function urlType({ value }: ArgumentValue): string {
-  if (string().url().safeParse(value).success === false) {
-    throw new ValidationError(
-      "Invalid URL. URLs must include a protocol and domain.",
-    );
-  }
+export function urlType({ value }: ArgumentValue): string {
+  validateURL(value);
   return value;
 }
 
-function kvType({ value }: ArgumentValue): string {
+export function kvType({ value }: ArgumentValue): string {
   if (value.split("=").length !== 2) {
     throw new ValidationError(
       "Invalid cookie. Must be of the format name=value.",
@@ -34,27 +29,19 @@ function kvType({ value }: ArgumentValue): string {
   return value;
 }
 
-function kvToMap(kv: string[]) {
-  return objectify(
-    kv?.map((cookie) => cookie.split("=")) ?? [],
-    ([key]) => key,
-    ([_, value]) => value,
-  );
-}
-
 export const cli = await new Command()
   .name("oa")
   .description("A Deno-based monkey testing CLI.")
   .version("v0.0.1")
   .type("URL", urlType)
   .type("KV", kvType)
-  .arguments("<url:URL>")
+  .arguments("[url:URL]")
   .option("-n, --num <num:integer>", "Number of monkeys to dispatch.", {
-    default: 1,
+    default: defaultConfig.num,
   })
   .option("-s, --show", "Show the browser windows.")
   .option("-d, --duration <duration:string>", "How long to run the test.", {
-    default: "10s",
+    default: defaultConfig.duration,
   })
   .option(
     "-f, --filter-links <filter:string>",
@@ -65,6 +52,7 @@ export const cli = await new Command()
   .option("-L, --skip-links", "Skip clicking links.")
   .option("-I, --skip-inputs", "Skip filling inputs.")
   .option("-T, --skip-typing", "Skip sending random keystrokes.")
+  .option("-D, --debug", "Whether to print additional debug information.")
   .option(
     "-c, --cookie <cookie:KV>",
     "Cookie to pass to the browser. Can be used multiple times. Example: -c foo=bar -c baz=qux.",
@@ -80,69 +68,54 @@ export const cli = await new Command()
     { collect: true },
   )
   .action(
-    async (
-      {
-        cookie = [],
-        header = [],
-        configFile,
-        duration,
-        show,
-        num,
-        skipButtons,
-        skipInputs,
-        skipLinks,
-        skipTyping,
-        filterLinks,
-      },
-      url,
-    ) => {
-      const loadedConfig = await loadConfig(configFile) ?? {};
-
-      const config = {
-        duration: "10s",
-        show: false,
-        num: num ?? 1,
-        cookies: [],
-        headers: {},
-        ...loadedConfig,
-      };
-
-      const colors = randomSubset(backgroundColorNames, config.num);
-
-      const cookies = [
-        ...config.cookies,
-        ...getSetCookies(
-          new Headers(cookie.map((cookie) => ["set-cookie", cookie])),
-        ),
-      ]
-        .map((cookie) => {
-          if (!cookie.domain) {
-            cookie.domain = new URL(url).hostname;
-          }
-          return cookie;
-        }) as Protocol.Network.CookieParam[];
-
+    async ({ cookie = [], header = [], debug, configFile, ...flags }, url) => {
       const headers = kvToMap(header);
+
+      const cookies = getSetCookies(
+        new Headers(cookie.map((cookie) => ["set-cookie", cookie])),
+      ) as Protocol.Network.CookieParam[];
+
+      const config = await loadConfig(configFile, {
+        ...flags,
+        url,
+        headers,
+        cookies,
+        debug,
+        targets: {
+          ...flags.skipButtons && { buttons: { enabled: false } },
+          ...flags.skipInputs && { inputs: { enabled: false } },
+          ...flags.skipLinks && { links: { enabled: false } },
+          ...flags.skipTyping && { typing: { enabled: false } },
+          ...flags.filterLinks &&
+            {
+              links: {
+                enabled: true,
+                filter: flags.filterLinks,
+              },
+            },
+        },
+      });
+
+      if (debug) {
+        console.log(
+          `\n${colors.bold("Configuration:")}\n\n${
+            JSON.stringify(config, null, 2)
+          }\n`,
+        );
+      }
+
+      const monkeyColors = randomSubset(
+        BG_COLORS,
+        config.num,
+      ) as ColorMethods[];
 
       await Promise.all(
         Array.from(range(1, config.num)).map((num, idx) =>
-          monkeyTest({
-            ...config,
-            ...shake({
-              name: `Monkey ${num}`,
-              duration,
-              color: colors[idx] as BackgroundColorName,
-              url,
-              show,
-              headers,
-              cookies,
-              skipButtons,
-              skipLinks,
-              skipInputs,
-              skipTyping,
-              filterLinks,
-            }) as MonkeyConfig,
-          })
+          monkeyTest(
+            `Monkey ${num}`,
+            monkeyColors[idx],
+            config,
+          )
         ),
       );
 

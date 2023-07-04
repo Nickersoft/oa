@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Generated schema for Root",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string"
+    },
+    "show": {
+      "type": "boolean"
+    },
+    "cookies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ]
+      }
+    },
+    "headers": {
+      "type": "object",
+      "properties": {
+        "Key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key"
+      ]
+    },
+    "targets": {
+      "type": "object",
+      "properties": {
+        "links": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "filter": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "buttons": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "typing": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "inputs": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        }
+      },
+      "required": []
+    }
+  },
+  "required": [
+    "url"
+  ]
+}

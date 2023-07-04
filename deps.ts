@@ -1,5 +1,7 @@
 export { getSetCookies } from "https://deno.land/std@0.192.0/http/cookie.ts";
 
+export { deepMerge } from "https://deno.land/std@0.192.0/collections/deep_merge.ts";
+
 export {
   default as puppeteer,
   type ElementHandle,
@@ -32,13 +34,8 @@ export {
 export * as stdColors from "https://deno.land/std@0.192.0/fmt/colors.ts";
 
 export { colors } from "https://deno.land/x/cliffy@v1.0.0-rc.1/ansi/colors.ts";
-
-export {
-  type BackgroundColorName,
-  backgroundColorNames,
-  Chalk,
-  type ChalkInstance,
-} from "npm:chalk@^5";
+export { Table } from "https://deno.land/x/cliffy@v1.0.0-rc.1/table/table.ts";
+export { Row } from "https://deno.land/x/cliffy@v1.0.0-rc.1/table/row.ts";
 
 export { default as ms } from "npm:ms@^2";
 

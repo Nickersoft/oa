@@ -1,10 +1,28 @@
 {
-  "show": true,
-  "filterLinks": "/read",
+  "$schema": "./oa.schema.json",
+  "url": "http://app-dev.linguistic.io:9000/read",
+  "show": false,
   "cookies": [
     {
       "name": "session",
       "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODg0MzYyMjMsImV4cCI6MTY4ODQzODAyMywiYXVkIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwiaXNzIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwic3ViIjoiMTgwIn0.RKoH9_1j_A64xiSAqacydwmbKevVJE38_xYAsT55YS8%3AeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODg0MzYyMjMsImV4cCI6MTY5MTExNDYyMywiYXVkIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwiaXNzIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwic3ViIjoiMTgwIiwianRpIjoiMjMifQ.LNR3P9rWhfwBIPW7d0JPDGQ7Gc41dguBBT5dIt9xyYQ.NEwrRX9bteOfg5Tr3XvHEVZXRw32vXGXOUc1SMMav%2Bg"
     }
-  ]
+  ],
+  "headers": {
+    "Key": "Value"
+  },
+  "targets": {
+    "links": {
+      "enabled": true
+    },
+    "buttons": {
+      "enabled": false
+    },
+    "typing": {
+      "enabled": true
+    },
+    "inputs": {
+      "enabled": false
+    }
+  }
 }

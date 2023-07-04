@@ -1,4 +1,5 @@
-import { KeyInput } from "../deps.ts";
+import { KeyInput, stdColors } from "../deps.ts";
+import { ColorMethods } from "./types.ts";
 
 export const STRING_TYPES = [
   "email",
@@ -40,3 +41,17 @@ export const KEYS = [
   "Meta",
   "Alt",
 ].concat(ALPHABET).concat(ALPHABET.map((el) => el.toUpperCase())) as KeyInput[];
+
+export const BG_COLORS: ColorMethods[] = [
+  "bgRed",
+  "bgGreen",
+  "bgYellow",
+  "bgMagenta",
+  "bgCyan",
+  "bgBrightRed",
+  "bgBrightGreen",
+  "bgBrightYellow",
+  "bgBrightBlue",
+  "bgBrightMagenta",
+  "bgBrightCyan",
+];
