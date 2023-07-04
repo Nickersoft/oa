@@ -8,7 +8,8 @@ export type DesiredAction =
   | "click-element"
   | "click-random"
   | "type-input"
-  | "type-random";
+  | "type-random"
+  | "scroll";
 
 export interface MonkeyConfig {
   url: string;
@@ -22,6 +23,7 @@ export interface MonkeyConfig {
     buttons?: Target;
     clicking?: Target;
     inputs?: Target;
+    scrolling?: Target;
     links?: Target & { filter?: string };
     typing?: Target;
   };

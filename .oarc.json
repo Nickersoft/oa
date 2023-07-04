@@ -5,13 +5,22 @@
   "cookies": [
     {
       "name": "session",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODg0OTUzMzEsImV4cCI6MTY4ODQ5NzEzMSwiYXVkIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwiaXNzIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwic3ViIjoiMTgwIn0.N9H6YLGZBBTNS2ffT1DAcPDVjOByg0tqfO2dDuDAjgI%3AeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODg0OTUzMzEsImV4cCI6MTY5MTE3MzczMSwiYXVkIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwiaXNzIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwic3ViIjoiMTgwIiwianRpIjoiMjQifQ._Ci-hibtSmAUOCvCt5ZAlHti47xy1Vjk1jH63uZkEwo.VXXVejl4qpXNZkPhtzewr%2BUcqwLduDroBLaRKgCaF4s"
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODg1MTI4NTQsImV4cCI6MTY4ODUxNDY1NCwiYXVkIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwiaXNzIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwic3ViIjoiMTgwIn0.sGPNxDOBiYrkEQKdTO56DG5cDu3pEMhBR3TVmzrhFGg%3AeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODg0OTUzMzEsImV4cCI6MTY5MTE3MzczMSwiYXVkIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwiaXNzIjoiaHR0cHM6Ly9saW5ndWlzdGljLmlvIiwic3ViIjoiMTgwIiwianRpIjoiMjQifQ._Ci-hibtSmAUOCvCt5ZAlHti47xy1Vjk1jH63uZkEwo.ECheMshpqkZGFetug2T8dTKyGbaiZYnFZqARY0mSlL0"
     }
   ],
   "targets": {
     "links": {
       "enabled": true,
       "filter": "/read/1"
+    },
+    "buttons": {
+      "enabled": true
+    },
+    "inputs": {
+      "enabled": true
+    },
+    "typing": {
+      "enabled": true
     }
   }
 }

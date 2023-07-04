@@ -17,6 +17,9 @@ export const defaultConfig = {
   duration: "10s",
   show: false,
   targets: {
+    scrolling: {
+      enabled: true,
+    },
     buttons: {
       enabled: true,
     },

@@ -66,6 +66,17 @@
             "enabled"
           ]
         },
+        "scrolling": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
         "buttons": {
           "type": "object",
           "properties": {

@@ -50,8 +50,10 @@ export const cli = await new Command()
   )
   .option("-B, --skip-buttons", "Skip clicking buttons.")
   .option("-L, --skip-links", "Skip clicking links.")
+  .option("-C, --skip-clicking", "Skip random clicking.")
   .option("-I, --skip-inputs", "Skip filling inputs.")
   .option("-T, --skip-typing", "Skip sending random keystrokes.")
+  .option("-S, --skip-scrolling", "Skip scrolling.")
   .option("-D, --debug", "Whether to print additional debug information.")
   .option(
     "-c, --cookie <cookie:KV>",
@@ -86,6 +88,8 @@ export const cli = await new Command()
           ...flags.skipInputs && { inputs: { enabled: false } },
           ...flags.skipLinks && { links: { enabled: false } },
           ...flags.skipTyping && { typing: { enabled: false } },
+          ...flags.skipClicking && { clicking: { enabled: false } },
+          ...flags.skipScrolling && { scrolling: { enabled: false } },
           ...flags.filterLinks &&
             {
               links: {

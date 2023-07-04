@@ -14,6 +14,8 @@ import { getRandomKeys, getRandomString } from "./random.ts";
 import { ColorMethods, DesiredAction, MonkeyConfig } from "./types.ts";
 
 async function getInteractiveElements(page: Page, config: MonkeyConfig) {
+  await page.waitForNetworkIdle({ idleTime: 250 }).catch(() => {});
+
   const clickableSelectors = [];
 
   if (config.targets?.buttons?.enabled) {
@@ -78,7 +80,11 @@ async function clickRandomElement(
   const text = await page.evaluate((el) => el.textContent, randomElement);
   const tag = await page.evaluate((el) => el.tagName, randomElement);
 
-  await randomElement?.click();
+  await randomElement?.click().catch((e) => {
+    logger.log(
+      `Error clicking "${tag.toLowerCase()}" element with text "${text}": ${e}`,
+    );
+  });
 
   logger.log(`Clicked "${tag.toLowerCase()}" element with text: "${text}"`);
 }
@@ -109,6 +115,14 @@ async function typeRandom(page: Page, logger: Logger) {
   logger.log(`Pressed the following keys: "${JSON.stringify(keys)}"`);
 }
 
+async function scrollRandomly(page: Page, logger: Logger) {
+  const deltaY = random(-1000, 1000);
+
+  await page.mouse.wheel({ deltaY });
+
+  logger.log(`Scrolled a delta of ${deltaY}"`);
+}
+
 function getDesiredActions(
   buttons: ElementHandle[],
   inputs: ElementHandle[],
@@ -123,6 +137,8 @@ function getDesiredActions(
 
   const shouldClickRandom = targets?.clicking?.enabled;
 
+  const shouldScroll = targets?.scrolling?.enabled;
+
   const shouldType = targets?.typing?.enabled;
 
   const shouldInput = inputs.length > 0 && targets?.inputs?.enabled;
@@ -133,6 +149,10 @@ function getDesiredActions(
 
   if (shouldClickElement) {
     actions.push("click-element");
+  }
+
+  if (shouldScroll) {
+    actions.push("scroll");
   }
 
   if (shouldClickRandom) {
@@ -164,35 +184,35 @@ async function startMonkey(
 
   await page.goto(url);
 
-  await page.waitForNetworkIdle({
-    idleTime: 250,
-    timeout: 5000,
-  }).catch(() => {});
-
   let currentURL = url;
   let elements = await getInteractiveElements(page, config);
   let running = true;
+  let actions: DesiredAction[] = getDesiredActions(
+    elements.buttons,
+    elements.inputs,
+    config,
+  );
 
   setTimeout(() => (running = false), ms(duration));
 
   while (running) {
     if (elements.buttons.length === 0 && elements.inputs.length === 0) {
       console.log("No interactive components found. Exiting...");
+      running = false;
       break;
     }
 
     if (page.url() !== currentURL) {
       elements = await getInteractiveElements(page, config);
       currentURL = page.url();
+      actions = getDesiredActions(
+        elements.buttons,
+        elements.inputs,
+        config,
+      );
     }
 
-    const actions = getDesiredActions(
-      elements.buttons,
-      elements.inputs,
-      config,
-    );
-
-    const action = draw(shuffle(actions));
+    const action = draw(actions);
 
     try {
       switch (action) {
@@ -201,6 +221,9 @@ async function startMonkey(
           break;
         case "click-element":
           await clickRandomElement(elements.buttons, page, logger);
+          break;
+        case "scroll":
+          await scrollRandomly(page, logger);
           break;
         case "click-random":
           await clickRandomPoint(page, logger);
@@ -228,6 +251,7 @@ export async function monkeyTest(
     defaultViewport: null,
     headless: !show,
   });
+
   const page = await browser.newPage();
 
   // Automatically close any new tabs that are opened
