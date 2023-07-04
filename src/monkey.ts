@@ -1,86 +1,198 @@
 import {
   type BackgroundColorName,
   draw,
+  ElementHandle,
   ms,
   Page,
+  Protocol,
   puppeteer,
   sleep,
 } from "../deps.ts";
 
-import { chalk } from "./chalk.ts";
+import { Logger } from "./log.ts";
 import { getRandomKeys, getRandomString } from "./random.ts";
 
-export interface MonkeyArgs {
+export interface MonkeyConfig {
   name: string;
   color: BackgroundColorName;
   url: string;
+  num: number;
   show?: boolean;
-  runFor?: string;
+  duration?: string;
+  cookies: Protocol.Network.CookieParam[];
+  headers: Record<string, string>;
+  skipButtons?: boolean;
+  skipLinks?: boolean;
+  skipInputs?: boolean;
+  skipTyping?: boolean;
+  filterLinks?: string;
 }
 
-async function getInteractiveElements(page: Page) {
-  const clickableSelectors = ["a", "button", "input"].join(", ");
+async function getInteractiveElements(page: Page, config: MonkeyConfig) {
+  const clickableSelectors = [];
 
-  const inputSelectors = [
-    `input`,
-    `not([type="select"])`,
-    `not([type="radio"])`,
-    `not([type="checkbox"])`,
-    `not([type="button"])`,
-    `not([type="submit"])`,
-  ].join(":");
+  if (!config.skipButtons) {
+    clickableSelectors.push(`button`);
+    clickableSelectors.push(`input[type="button"]`);
+    clickableSelectors.push(`input[type="submit"]`);
+  }
+
+  if (!config.skipLinks) {
+    let selector = "a";
+
+    if (config.filterLinks) {
+      selector += `[href~="${config.filterLinks.replace('"', '\\"')}"]`;
+    }
+    console.log(selector);
+    clickableSelectors.push(selector);
+  }
+
+  const inputSelectors = !config.skipInputs
+    ? [
+      `input`,
+      `not([type="select"])`,
+      `not([type="radio"])`,
+      `not([type="checkbox"])`,
+      `not([type="button"])`,
+      `not([type="submit"])`,
+    ]
+    : [];
 
   return {
-    buttons: await page.$$(clickableSelectors),
-    inputs: await page.$$(inputSelectors),
+    buttons: await page.$$(clickableSelectors.join(", ")),
+    inputs: await page.$$(inputSelectors.join(":")),
   };
 }
 
-export async function monkeyTest(
-  { name, color, url, show, runFor }: MonkeyArgs,
+async function clickRandom(
+  elements: ElementHandle[],
+  page: Page,
+  logger: Logger,
 ) {
-  const browser = await puppeteer.launch({ headless: !show });
-  const page = await browser.newPage();
-  const prefix = chalk[color](`[${name}]`);
-  const runtimeMs = ms(runFor);
+  const randomElement = draw(elements);
+  const text = await page.evaluate((el) => el.textContent, randomElement);
+  const tag = await page.evaluate((el) => el.tagName, randomElement);
+
+  await randomElement?.click();
+
+  logger.log(`Clicked "${tag.toLowerCase()}" element with text: "${text}"`);
+}
+
+async function inputRandom(
+  elements: ElementHandle[],
+  page: Page,
+  logger: Logger,
+) {
+  const randomElement = draw(elements);
+  const text = getRandomString();
+
+  await randomElement?.focus();
+  await randomElement?.evaluate((el) => el.value = "");
+  await page.keyboard.type(text);
+  await page.keyboard.press("Enter");
+
+  logger.log(`Filled input with string: "${text}"`);
+}
+
+async function typeRandom(page: Page, logger: Logger) {
+  const keys = getRandomKeys();
+
+  for (const key of keys) {
+    key && await page.keyboard.press(key);
+  }
+
+  logger.log(`Pressed the following keys: "${JSON.stringify(keys)}"`);
+}
+
+function getDesiredActions(
+  buttons: ElementHandle[],
+  inputs: ElementHandle[],
+  config: MonkeyConfig,
+) {
+  const { skipInputs, skipLinks, skipButtons } = config;
+
+  const actions: ("click" | "type" | "input")[] = [];
+  const shouldClick = buttons.length > 0 && !skipButtons && !skipLinks;
+  const shouldType = !config.skipTyping;
+  const shouldInput = inputs.length > 0 && !skipInputs;
+
+  if (shouldType) {
+    actions.push("type");
+  }
+
+  if (shouldClick) {
+    actions.push("click");
+  }
+
+  if (shouldInput) {
+    actions.push("input");
+  }
+
+  return actions;
+}
+
+async function startMonkey(name: string, page: Page, config: MonkeyConfig) {
+  const { color, url, headers, duration, cookies } = config;
+
+  const logger = new Logger(name, color);
+
+  logger.log(`Waiting for first page load...`);
+
+  await page.setExtraHTTPHeaders(headers);
+  await page.setCookie(...cookies);
+  await page.goto(url);
+  await page.waitForNetworkIdle({ idleTime: 250 });
 
   let currentURL = url;
+  let elements = await getInteractiveElements(page, config);
+  let running = true;
 
-  function log(text: string) {
-    console.log(`${prefix} ${text}`);
-  }
+  setTimeout(() => (running = false), ms(duration));
 
-  async function clickRandom() {
-    const randomElement = draw(elements.buttons);
-    const text = await page.evaluate((el) => el.textContent, randomElement);
-    const tag = await page.evaluate((el) => el.tagName, randomElement);
-
-    await randomElement?.click();
-
-    log(`Clicked "${tag.toLowerCase()}" element with text: "${text}"`);
-  }
-
-  async function inputRandom() {
-    const randomElement = draw(elements.inputs);
-    const text = getRandomString();
-
-    await randomElement?.focus();
-    await randomElement?.evaluate((el) => el.value = "");
-    await page.keyboard.type(text);
-    await page.keyboard.press("Enter");
-
-    log(`Filled input with string: "${text}"`);
-  }
-
-  async function typeRandom() {
-    const keys = getRandomKeys();
-
-    for (const key of keys) {
-      key && await page.keyboard.press(key);
+  while (running) {
+    if (elements.buttons.length === 0 && elements.inputs.length === 0) {
+      console.log("No interactive components found. Exiting...");
+      break;
     }
 
-    log(`Pressed the following keys: "${JSON.stringify(keys)}"`);
+    if (page.url() !== currentURL) {
+      elements = await getInteractiveElements(page, config);
+      currentURL = page.url();
+    }
+
+    const actions = getDesiredActions(
+      elements.buttons,
+      elements.inputs,
+      config,
+    );
+
+    const action = draw(actions);
+
+    try {
+      switch (action) {
+        case "type":
+          await typeRandom(page, logger);
+          break;
+        case "click":
+          await clickRandom(elements.buttons, page, logger);
+          break;
+        case "input":
+          await inputRandom(elements.inputs, page, logger);
+          break;
+      }
+
+      await sleep(150);
+    } catch (_e: unknown) {
+      // Skip errors
+    }
   }
+}
+
+export async function monkeyTest(config: MonkeyConfig) {
+  const { name, show } = config;
+
+  const browser = await puppeteer.launch({ headless: !show });
+  const page = await browser.newPage();
 
   // Automatically close any new tabs that are opened
   browser.on("targetcreated", async (target) => {
@@ -93,54 +205,5 @@ export async function monkeyTest(
     await browser.close();
   });
 
-  await page.goto(currentURL);
-
-  log(`Waiting for first page load...`);
-
-  await page.waitForNetworkIdle({ idleTime: 250 });
-
-  let elements = await getInteractiveElements(page);
-  let running = true;
-
-  setTimeout(() => {
-    running = false;
-  }, runtimeMs);
-
-  while (running) {
-    if (elements.buttons.length === 0 && elements.inputs.length === 0) {
-      console.log("No interactive components found. Exiting...");
-      break;
-    }
-
-    if (page.url() !== currentURL) {
-      elements = await getInteractiveElements(page);
-      currentURL = page.url();
-    }
-
-    const actions: ("click" | "type" | "input")[] = ["type"];
-
-    if (elements.buttons.length > 0) actions.push("click");
-
-    if (elements.inputs.length > 0) actions.push("input");
-
-    const action = draw(actions);
-
-    try {
-      switch (action) {
-        case "type":
-          await typeRandom();
-          break;
-        case "click":
-          await clickRandom();
-          break;
-        case "input":
-          await inputRandom();
-          break;
-      }
-
-      await sleep(150);
-    } catch (_e: unknown) {
-      // Skip errors
-    }
-  }
+  return startMonkey(name, page, config);
 }

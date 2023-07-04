@@ -1,4 +1,7 @@
 {
+  "fmt": {
+    "lineWidth": 120
+  },
   "tasks": {
     "build": "deno compile --allow-env --allow-write --allow-read --allow-run --allow-net -o bin/chaos oa.ts",
     "dev": "deno run --allow-env --allow-write --allow-read --allow-run --allow-net --watch oa.ts"
