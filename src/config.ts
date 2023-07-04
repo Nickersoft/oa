@@ -47,6 +47,7 @@ export async function loadConfig(
     deepMerge(
       shake(config),
       shake({
+        ...mergeIn,
         duration: mergeIn.duration === defaultConfig.duration
           ? undefined
           : mergeIn.duration,

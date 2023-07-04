@@ -4,6 +4,12 @@ interface Target {
   enabled: boolean;
 }
 
+export type DesiredAction =
+  | "click-element"
+  | "click-random"
+  | "type-input"
+  | "type-random";
+
 export interface MonkeyConfig {
   url: string;
   num: number;
@@ -14,6 +20,7 @@ export interface MonkeyConfig {
   headers: Record<string, string>;
   targets?: {
     buttons?: Target;
+    clicking?: Target;
     inputs?: Target;
     links?: Target & { filter?: string };
     typing?: Target;
@@ -27,10 +34,6 @@ export type ColorMethods = Extract<
   | "bgYellow"
   | "bgMagenta"
   | "bgCyan"
-  | "bgBrightRed"
-  | "bgBrightGreen"
-  | "bgBrightYellow"
-  | "bgBrightBlue"
-  | "bgBrightMagenta"
-  | "bgBrightCyan"
+  | "bgBlack"
+  | "bgWhite"
 >;

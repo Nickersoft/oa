@@ -1,8 +1,17 @@
-import { draw, ElementHandle, ms, Page, puppeteer, sleep } from "../deps.ts";
+import {
+  draw,
+  ElementHandle,
+  ms,
+  Page,
+  puppeteer,
+  random,
+  shuffle,
+  sleep,
+} from "../deps.ts";
 
 import { Logger } from "./log.ts";
 import { getRandomKeys, getRandomString } from "./random.ts";
-import { ColorMethods, MonkeyConfig } from "./types.ts";
+import { ColorMethods, DesiredAction, MonkeyConfig } from "./types.ts";
 
 async function getInteractiveElements(page: Page, config: MonkeyConfig) {
   const clickableSelectors = [];
@@ -19,7 +28,7 @@ async function getInteractiveElements(page: Page, config: MonkeyConfig) {
     let selector = "a";
 
     if (filter) {
-      selector += `[href~="${filter.replace('"', '\\"')}"]`;
+      selector += `[href*="${filter.replace('"', '\\"')}"]`;
     }
 
     clickableSelectors.push(selector);
@@ -46,7 +55,21 @@ async function getInteractiveElements(page: Page, config: MonkeyConfig) {
   };
 }
 
-async function clickRandom(
+async function clickRandomPoint(page: Page, logger: Logger) {
+  const body = await page.$("body");
+  const boundingBox = await body?.boundingBox();
+
+  if (boundingBox) {
+    const randomX = random(0, boundingBox.width);
+    const randomY = random(0, boundingBox.height);
+
+    page.mouse.click(randomX, randomY);
+
+    logger.log(`Clicked at (${randomX}, ${randomY})`);
+  }
+}
+
+async function clickRandomElement(
   elements: ElementHandle[],
   page: Page,
   logger: Logger,
@@ -93,25 +116,31 @@ function getDesiredActions(
 ) {
   const { targets } = config;
 
-  const actions: ("click" | "type" | "input")[] = [];
+  const actions: DesiredAction[] = [];
 
-  const shouldClick = buttons.length > 0 && (targets?.buttons?.enabled ||
+  const shouldClickElement = buttons.length > 0 && (targets?.buttons?.enabled ||
     targets?.links?.enabled);
+
+  const shouldClickRandom = targets?.clicking?.enabled;
 
   const shouldType = targets?.typing?.enabled;
 
   const shouldInput = inputs.length > 0 && targets?.inputs?.enabled;
 
   if (shouldType) {
-    actions.push("type");
+    actions.push("type-random");
   }
 
-  if (shouldClick) {
-    actions.push("click");
+  if (shouldClickElement) {
+    actions.push("click-element");
+  }
+
+  if (shouldClickRandom) {
+    actions.push("click-random");
   }
 
   if (shouldInput) {
-    actions.push("input");
+    actions.push("type-input");
   }
 
   return actions;
@@ -163,17 +192,20 @@ async function startMonkey(
       config,
     );
 
-    const action = draw(actions);
+    const action = draw(shuffle(actions));
 
     try {
       switch (action) {
-        case "type":
+        case "type-random":
           await typeRandom(page, logger);
           break;
-        case "click":
-          await clickRandom(elements.buttons, page, logger);
+        case "click-element":
+          await clickRandomElement(elements.buttons, page, logger);
           break;
-        case "input":
+        case "click-random":
+          await clickRandomPoint(page, logger);
+          break;
+        case "type-input":
           await inputRandom(elements.inputs, page, logger);
           break;
       }

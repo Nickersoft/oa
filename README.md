@@ -1,4 +1,4 @@
-# 🦍 oa
+![Logo](./logo.png)
 
 `oa` (short for ["oo oo aa aa"](https://www.youtube.com/watch?v=yb8ZAP5JCuk)) is a simple command-line tool for monkey testing frontend applications. 
 
@@ -28,12 +28,59 @@ oa http://127.0.0.1:8080/login
 
 `oa` supports a few flags to customize its behavior:
 
-| Name       | Alias | Description                                                                              | Default |
-| ---------- | ----- | ---------------------------------------------------------------------------------------- | ------- |
-| `--show`   | `-s`  | Show the browser window while testing.                                                   | `false` |
-| `--num`    | `-n`  | The number of monkeys/instances to run.                                                  | 1       |
-| `--time`   | `-t`  | The duration to run the test. Supports human-readable times such as '5m', '1 hour', etc. | 10s     |
-| `--header` | `-H`  | HTTP header to pass to the browser. Can be used multiple times.                          |         |
-| `--cookie` | `-c`  | Cookie string to pass to the browser. Can be used multiple times.                        | 10s     |
+| Name              | Alias | Description                                                                              | Default |
+| ----------------- | ----- | ---------------------------------------------------------------------------------------- | ------- |
+| `--show`          | `-s`  | Show the browser window while testing.                                                   | `false` |
+| `--num`           | `-n`  | The number of monkeys/instances to run.                                                  | 1       |
+| `--duration`      | `-d`  | The duration to run the test. Supports human-readable times such as '5m', '1 hour', etc. | 10s     |
+| `--header`        | `-H`  | HTTP header to pass to the browser. Can be used multiple times.                          |         |
+| `--cookie`        | `-c`  | Cookie string to pass to the browser. Can be used multiple times.                        | 10s     |
+| `--skip-links`    | `-L`  | Skip clicking on links.                                                                  | `false` |
+| `--skip-inputs`   | `-I`  | Skip filling in inputs.                                                                  | `false` |
+| `--skip-clicking` | `-C`  | Skip random clicking on the page.                                                        | `false` |
+| `--skip-buttons`  | `-B`  | Skip clicking on buttons.                                                                | `false` |
+| `--filter-links`  | `-l`  | Only click on links that contain the provided string.                                    |         |
+| `--config-file`   | `-F`  | Path to a configuration file.                                                            |         |
 
+## Configuration File
 
+You can also pass a `oa.config.json` configuration file to `oa` to specify the above options as well:
+
+```json
+{
+  "$schema": "./oa.schema.json",
+  "url": "http://127.0.0.1:8080/login",
+  "show": false,
+  "cookies": [
+    {
+      "name": "Key",
+      "value": "Value",
+      "expiresIn": 5000,
+      "domain": "facebook.com"
+    }
+  ],
+  "headers": {
+    "Key": "Value"
+  },
+  "targets": {
+    "links": {
+      "enabled": true,
+      "filter": "/read/1"
+    },
+    "buttons": {
+      "enabled": true
+    },
+    "inputs": {
+      "enabled": true
+    },
+    "clicking": {
+      "enabled": true
+    },
+    "typing": {
+      "enabled": true
+    }
+  }
+}
+```
+
+In this case, you just need to run `oa` to start the monkeys. Unless the `--config-file` flag is used, `oa` will look in the current directory for a `oa.config.json` file.

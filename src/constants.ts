@@ -48,10 +48,6 @@ export const BG_COLORS: ColorMethods[] = [
   "bgYellow",
   "bgMagenta",
   "bgCyan",
-  "bgBrightRed",
-  "bgBrightGreen",
-  "bgBrightYellow",
-  "bgBrightBlue",
-  "bgBrightMagenta",
-  "bgBrightCyan",
+  "bgWhite",
+  "bgBlack",
 ];

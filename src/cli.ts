@@ -96,6 +96,12 @@ export const cli = await new Command()
         },
       });
 
+      if (config.num < 1 || config.num > 7) {
+        throw new ValidationError(
+          "Number of monkeys must be between 1 and 7.",
+        );
+      }
+
       if (debug) {
         console.log(
           `\n${colors.bold("Configuration:")}\n\n${
