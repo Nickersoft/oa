@@ -1,6 +1,6 @@
 ![Logo](./logo.png)
 
-`oa` (short for ["oo oo aa aa"](https://www.youtube.com/watch?v=yb8ZAP5JCuk)) is a simple command-line tool for monkey testing frontend applications. 
+`oa` (short for ["ooh ooh ah ah"](https://www.youtube.com/watch?v=yb8ZAP5JCuk)) is a simple command-line tool for monkey testing frontend applications. 
 
 [Monkey testing](https://en.wikipedia.org/wiki/Monkey_testing) is a technique in which random click, input and keyboard events are sent to an application to test its resilience. In other words, as if a monkey was using it. Monkey testing can also be helpful for adding an increased load to the application to debug performance and memory bottlenecks.
 
@@ -34,7 +34,7 @@ oa http://127.0.0.1:8080/login
 | `--num`           | `-n`  | The number of monkeys/instances to run.                                                  | 1       |
 | `--duration`      | `-d`  | The duration to run the test. Supports human-readable times such as '5m', '1 hour', etc. | 10s     |
 | `--header`        | `-H`  | HTTP header to pass to the browser. Can be used multiple times.                          |         |
-| `--cookie`        | `-c`  | Cookie string to pass to the browser. Can be used multiple times.                        | 10s     |
+| `--cookie`        | `-c`  | Cookie string to pass to the browser. Can be used multiple times.                        |         |
 | `--skip-links`    | `-L`  | Skip clicking on links.                                                                  | `false` |
 | `--skip-inputs`   | `-I`  | Skip filling in inputs.                                                                  | `false` |
 | `--skip-clicking` | `-C`  | Skip random clicking on the page.                                                        | `false` |
