@@ -1,8 +1,11 @@
-import { draw, faker, random, shuffle } from "../deps.ts";
+import { faker } from "faker";
+import { random, shuffle } from "radash";
+import { sample } from "std/collections/sample.ts";
+
 import { KEYS } from "./constants.ts";
 
 export function getRandomKeys() {
-  return new Array(random(1, 10)).fill(0).map(() => draw(KEYS));
+  return new Array(random(1, 10)).fill(0).map(() => sample(KEYS));
 }
 
 export function randomSubset(arr: readonly string[], size: number) {
@@ -10,7 +13,7 @@ export function randomSubset(arr: readonly string[], size: number) {
 }
 
 export function getRandomString(): string {
-  const strType = draw(
+  const strType = sample(
     [
       "email",
       "name",

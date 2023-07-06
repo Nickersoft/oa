@@ -1,20 +1,17 @@
-import {
-  draw,
-  ElementHandle,
-  ms,
-  Page,
-  puppeteer,
-  random,
-  shuffle,
-  sleep,
-} from "../deps.ts";
+import ms from "ms";
+
+import puppeteer, { type ElementHandle, type Page } from "puppeteer/mod.ts";
+import { sample } from "std/collections/sample.ts";
+import { delay } from "std/async/mod.ts";
+
+import { random } from "radash";
 
 import { Logger } from "./log.ts";
 import { getRandomKeys, getRandomString } from "./random.ts";
 import { ColorMethods, DesiredAction, MonkeyConfig } from "./types.ts";
 
 async function getInteractiveElements(page: Page, config: MonkeyConfig) {
-  await page.waitForNetworkIdle({ idleTime: 250 }).catch(() => {});
+  await page.waitForNetworkIdle({ timeout: 30000 });
 
   const clickableSelectors = [];
 
@@ -48,12 +45,8 @@ async function getInteractiveElements(page: Page, config: MonkeyConfig) {
     : [];
 
   return {
-    buttons: clickableSelectors.length > 0
-      ? await page.$$(clickableSelectors.join(", "))
-      : [],
-    inputs: inputSelectors.length > 0
-      ? await page.$$(inputSelectors.join(":"))
-      : [],
+    buttons: clickableSelectors.length > 0 ? await page.$$(clickableSelectors.join(", ")) : [],
+    inputs: inputSelectors.length > 0 ? await page.$$(inputSelectors.join(":")) : [],
   };
 }
 
@@ -76,7 +69,7 @@ async function clickRandomElement(
   page: Page,
   logger: Logger,
 ) {
-  const randomElement = draw(elements);
+  const randomElement = sample(elements);
   const text = await page.evaluate((el) => el.textContent, randomElement);
   const tag = await page.evaluate((el) => el.tagName, randomElement);
 
@@ -94,7 +87,7 @@ async function inputRandom(
   page: Page,
   logger: Logger,
 ) {
-  const randomElement = draw(elements);
+  const randomElement = sample(elements);
   const text = getRandomString();
 
   await randomElement?.focus();
@@ -212,7 +205,7 @@ async function startMonkey(
       );
     }
 
-    const action = draw(actions);
+    const action = sample(actions);
 
     try {
       switch (action) {
@@ -233,7 +226,7 @@ async function startMonkey(
           break;
       }
 
-      await sleep(150);
+      await delay(150);
     } catch (_e: unknown) {
       // Skip errors
     }

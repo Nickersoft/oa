@@ -1,4 +1,5 @@
-import { colors } from "../deps.ts";
+import { colors } from "cliffy/ansi/colors.ts";
+
 import { ColorMethods } from "./types.ts";
 
 export class Logger {

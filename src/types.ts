@@ -1,4 +1,6 @@
-import { Protocol, stdColors } from "../deps.ts";
+import * as stdColors from "std/fmt/colors.ts";
+
+import Protocol from "puppeteer/vendor/puppeteer-core/vendor/devtools-protocol/types/protocol.d.ts";
 
 interface Target {
   enabled: boolean;

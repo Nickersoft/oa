@@ -1,4 +1,5 @@
-import { KeyInput, stdColors } from "../deps.ts";
+import { KeyInput } from "puppeteer/mod.ts";
+
 import { ColorMethods } from "./types.ts";
 
 export const STRING_TYPES = [

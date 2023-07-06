@@ -1,12 +1,12 @@
-import {
-  cosmiconfig,
-  deepMerge,
-  Protocol,
-  shake,
-  ValidationError,
-} from "../deps.ts";
+import { cosmiconfig } from "cosmiconfig";
+
+import { ValidationError } from "cliffy/flags/_errors.ts";
+import { deepMerge } from "std/collections/deep_merge.ts";
+
+import type { Protocol } from "puppeteer/vendor/puppeteer-core/vendor/devtools-protocol/types/protocol.d.ts";
+
 import { MonkeyConfig } from "./types.ts";
-import { validateURL } from "./utils.ts";
+import { shake, validateURL } from "./utils.ts";
 
 export const defaultConfig = {
   cookies: [],
@@ -43,17 +43,15 @@ export async function loadConfig(
 
   const result = await (path ? cc.load(path) : cc.search("."));
 
-  const config = result?.config ?? {};
+  const config = shake(result?.config ?? {});
 
   const combined = deepMerge(
     defaultConfig,
     deepMerge(
-      shake(config),
+      config,
       shake({
         ...mergeIn,
-        duration: mergeIn.duration === defaultConfig.duration
-          ? undefined
-          : mergeIn.duration,
+        duration: mergeIn.duration === defaultConfig.duration ? undefined : mergeIn.duration,
         num: mergeIn.num === defaultConfig.num ? undefined : mergeIn.num,
       }),
     ),
@@ -67,7 +65,7 @@ export async function loadConfig(
 
   const cookies = combined.cookies.map(({ domain, ...cookie }) => ({
     ...cookie,
-    domain: domain ?? new URL(config.url).hostname,
+    domain: domain ?? new URL(combined.url).hostname,
   })) as Protocol.Network.CookieParam[];
 
   return {

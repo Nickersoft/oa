@@ -1,12 +1,13 @@
-import {
-  ArgumentValue,
-  colors,
-  Command,
-  getSetCookies,
-  Protocol,
-  range,
-  ValidationError,
-} from "../deps.ts";
+import { ArgumentValue } from "cliffy/flags/types.ts";
+import { Command, ValidationError } from "cliffy/command/mod.ts";
+import { colors } from "cliffy/ansi/colors.ts";
+
+import { getSetCookies } from "std/http/cookie.ts";
+
+import { range } from "radash";
+
+import { Protocol } from "puppeteer/vendor/puppeteer-core/vendor/devtools-protocol/types/protocol.d.ts";
+
 import { defaultConfig, loadConfig } from "./config.ts";
 import { BG_COLORS } from "./constants.ts";
 
@@ -108,9 +109,7 @@ export const cli = await new Command()
 
       if (debug) {
         console.log(
-          `\n${colors.bold("Configuration:")}\n\n${
-            JSON.stringify(config, null, 2)
-          }\n`,
+          `\n${colors.bold("Configuration:")}\n\n${JSON.stringify(config, null, 2)}\n`,
         );
       }
 
