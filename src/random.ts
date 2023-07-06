@@ -1,11 +1,12 @@
 import { faker } from "faker";
-import { random, shuffle } from "radash";
+
 import { sample } from "std/collections/sample.ts";
 
 import { KEYS } from "./constants.ts";
+import { shuffle } from "./utils.ts";
 
 export function getRandomKeys() {
-  return new Array(random(1, 10)).fill(0).map(() => sample(KEYS));
+  return new Array(faker.number.int({ min: 1, max: 10 })).fill(0).map(() => sample(KEYS));
 }
 
 export function randomSubset(arr: readonly string[], size: number) {

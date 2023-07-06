@@ -4,8 +4,6 @@ import { colors } from "cliffy/ansi/colors.ts";
 
 import { getSetCookies } from "std/http/cookie.ts";
 
-import { range } from "radash";
-
 import { Protocol } from "puppeteer/vendor/puppeteer-core/vendor/devtools-protocol/types/protocol.d.ts";
 
 import { defaultConfig, loadConfig } from "./config.ts";
@@ -14,7 +12,7 @@ import { BG_COLORS } from "./constants.ts";
 import { monkeyTest } from "./monkey.ts";
 import { randomSubset } from "./random.ts";
 import { ColorMethods } from "./types.ts";
-import { kvToMap, validateURL } from "./utils.ts";
+import { kvToMap, range, validateURL } from "./utils.ts";
 
 export function urlType({ value }: ArgumentValue): string {
   validateURL(value);

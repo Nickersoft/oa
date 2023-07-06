@@ -1,10 +1,10 @@
 import ms from "ms";
 
+import { faker } from "faker";
+
 import puppeteer, { type ElementHandle, type Page } from "puppeteer/mod.ts";
 import { sample } from "std/collections/sample.ts";
 import { delay } from "std/async/mod.ts";
-
-import { random } from "radash";
 
 import { Logger } from "./log.ts";
 import { getRandomKeys, getRandomString } from "./random.ts";
@@ -55,8 +55,8 @@ async function clickRandomPoint(page: Page, logger: Logger) {
   const boundingBox = await body?.boundingBox();
 
   if (boundingBox) {
-    const randomX = random(0, boundingBox.width);
-    const randomY = random(0, boundingBox.height);
+    const randomX = faker.number.int({ min: 0, max: boundingBox.width });
+    const randomY = faker.number.int({ min: 0, max: boundingBox.height });
 
     page.mouse.click(randomX, randomY);
 
@@ -109,7 +109,7 @@ async function typeRandom(page: Page, logger: Logger) {
 }
 
 async function scrollRandomly(page: Page, logger: Logger) {
-  const deltaY = random(-1000, 1000);
+  const deltaY = faker.number.int({ min: -1000, max: 1000 });
 
   await page.mouse.wheel({ deltaY });
 

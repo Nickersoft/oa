@@ -9,7 +9,6 @@
     "std/": "https://deno.land/std@0.192.0/",
     "ms": "npm:ms@^2",
     "faker": "npm:@faker-js/faker@^8",
-    "radash": "npm:radash@^10",
     "cosmiconfig": "npm:cosmiconfig@^8"
   },
   "tasks": {
