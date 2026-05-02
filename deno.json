@@ -6,7 +6,7 @@
     "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.1/",
     "zod/": "https://deno.land/x/zod@v3.21.4/",
     "puppeteer/": "https://deno.land/x/puppeteer@16.2.0/",
-    "std/": "https://deno.land/std@0.192.0/",
+    "std/": "https://deno.land/std@0.224.0/",
     "ms": "npm:ms@^2",
     "faker": "npm:@faker-js/faker@^8",
     "cosmiconfig": "npm:cosmiconfig@^8"
