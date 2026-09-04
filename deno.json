@@ -8,7 +8,7 @@
     "puppeteer/": "https://deno.land/x/puppeteer@16.2.0/",
     "std/": "https://deno.land/std@0.192.0/",
     "ms": "npm:ms@^2",
-    "faker": "npm:@faker-js/faker@^8",
+    "faker": "npm:@faker-js/faker@^10.0.0",
     "cosmiconfig": "npm:cosmiconfig@^8"
   },
   "tasks": {
