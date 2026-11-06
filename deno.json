@@ -9,7 +9,7 @@
     "std/": "https://deno.land/std@0.192.0/",
     "ms": "npm:ms@^2",
     "faker": "npm:@faker-js/faker@^8",
-    "cosmiconfig": "npm:cosmiconfig@^8"
+    "cosmiconfig": "npm:cosmiconfig@^10.0.0"
   },
   "tasks": {
     "build": "deno compile --allow-env --allow-write --allow-read --allow-run --allow-net -o bin/chaos oa.ts",
